@@ -25,12 +25,12 @@ from ..transcription.whisper import WhisperTranscriber
 from ..utils.text import normalize_text, tokenize_words
 
 try:
-    from .grok_feedback import GrokFeedback
-    GROK_AVAILABLE = True
+    from .groq_feedback import GroqFeedback
+    GROQ_AVAILABLE = True
 except Exception as e:
-    print(f"Warning: Grok feedback not available: {e}")
-    GROK_AVAILABLE = False
-    GrokFeedback = None
+    print(f"Warning: Groq feedback not available: {e}")
+    GROQ_AVAILABLE = False
+    GroqFeedback = None
 
 
 class EvaluationService:
@@ -40,14 +40,14 @@ class EvaluationService:
         store: SQLiteStore,
         transcriber: WhisperTranscriber,
         phoneme_comparator: PhonemeComparator,
-        grok_feedback: any = None,
+        groq_feedback: any = None,
     ) -> None:
         self.store = store
         self.transcriber = transcriber
         self.phoneme_comparator = phoneme_comparator
-        if GROK_AVAILABLE and GrokFeedback:
+        if GROQ_AVAILABLE and GroqFeedback:
             try:
-                self.ai_feedback_service = grok_feedback or GrokFeedback()
+                self.ai_feedback_service = groq_feedback or GroqFeedback()
                 self.ai_enabled = self.ai_feedback_service.enabled
             except Exception as e:
                 print(f"Warning: AI feedback disabled: {e}")

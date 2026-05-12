@@ -3,10 +3,10 @@ import sys
 from typing import Optional
 
 
-class GrokFeedback:
+class GroqFeedback:
     def __init__(self) -> None:
-        self.api_key = os.getenv("GROK_API_KEY")
-        self.model = os.getenv("GROK_MODEL", "grok-2-latest")
+        self.api_key = os.getenv("GROQ_API_KEY")
+        self.model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
         self.enabled = bool(self.api_key)
         self.client = None
         
@@ -15,13 +15,13 @@ class GrokFeedback:
                 from openai import OpenAI
                 self.client = OpenAI(
                     api_key=self.api_key,
-                    base_url="https://api.x.ai/v1",
+                    base_url="https://api.groq.com/openai/v1",
                 )
             except ImportError:
                 print("Warning: openai library not available, disabling AI feedback.", file=sys.stderr)
                 self.enabled = False
             except Exception as e:
-                print(f"Warning: Failed to init Grok client, disabling AI feedback: {e}", file=sys.stderr)
+                print(f"Warning: Failed to init Groq client, disabling AI feedback: {e}", file=sys.stderr)
                 self.enabled = False
 
     def generate_feedback(
@@ -75,5 +75,5 @@ Avoid jargon. Make it supportive and actionable.
             return response.choices[0].message.content
 
         except Exception as e:
-            print(f"Grok API error: {e}", file=sys.stderr)
+            print(f"Groq API error: {e}", file=sys.stderr)
             return None
