@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+whisper-openai
+numpy
+pydantic
+python-multipart
+nltk
+language-tool-python
+openai
+python-dotenv
