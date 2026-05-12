@@ -477,6 +477,17 @@ export default function App() {
             {error ? (
               <div style={{ marginTop: 10, color: "#ea4335" }}>{error}</div>
             ) : null}
+
+            {result?.ai_feedback && (
+              <div className="card" style={{ marginTop: 20, background: "rgba(167, 139, 250, 0.08)", border: "1px solid rgba(167, 139, 250, 0.25)", padding: "20px" }}>
+                <div className="meta" style={{ color: "#c4b5fd", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "18px" }}>🤖</span>AI Pronunciation Coach
+                </div>
+                <div style={{ lineHeight: "1.8", color: "#e2e8f0", whiteSpace: "pre-wrap", fontSize: "15px" }}>
+                  {result.ai_feedback}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="card" style={{ flex: "1 1 420px" }}>
@@ -537,16 +548,7 @@ export default function App() {
                   </div>
                 )}
 
-                {result.ai_feedback && (
-                  <div className="card" style={{ marginTop: 20, background: "rgba(167, 139, 250, 0.08)", border: "1px solid rgba(167, 139, 250, 0.25)" }}>
-                    <div className="meta" style={{ color: "#c4b5fd", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                      <span style={{ fontSize: "18px" }}></span>AI Pronunciation Coach
-                    </div>
-                    <div style={{ lineHeight: "1.8", color: "#e2e8f0", whiteSpace: "pre-wrap" }}>
-                      {result.ai_feedback}
-                    </div>
-                  </div>
-                )}
+
 
                 {result.suggestions?.length ? (
                   <div className="status" style={{ marginTop: 14 }}>
