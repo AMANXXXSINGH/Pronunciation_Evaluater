@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Mic, Moon, Sun, Bot, Megaphone, PenTool, Volume2, MessageSquare } from "lucide-react";
 import Recorder from "./components/Recorder.jsx";
-import WordHighlighter from "./components/WordHighlighter.jsx";
 import VocabularyGame from "./components/VocabularyGame.jsx";
 import {
   evaluateAudio,
@@ -48,124 +48,24 @@ const playTTS = (text, lang) => {
   window.speechSynthesis.speak(utterance);
 };
 
-const VOCABULARY = [
-  {
-    word: "Resilient",
-    definition: "Able to recover quickly from difficulties.",
-  },
-  {
-    word: "Eloquent",
-    definition: "Expressive and persuasive in speaking or writing.",
-  },
-  {
-    word: "Curious",
-    definition: "Eager to know or learn something.",
-  },
-  {
-    word: "Venture",
-    definition: "A risky or daring journey or undertaking.",
-  },
-  {
-    word: "Adapt",
-    definition: "To adjust to new conditions.",
-  },
-  {
-    word: "Insight",
-    definition: "A deep understanding of a person or thing.",
-  },
-  {
-    word: "Harmonious",
-    definition: "Forming a pleasing or consistent whole.",
-  },
-  {
-    word: "Precise",
-    definition: "Marked by exactness and accuracy of expression.",
-  },
-  {
-    word: "Subtle",
-    definition:
-      "So delicate or precise as to be difficult to analyze or describe.",
-  },
-  {
-    word: "Genuine",
-    definition: "Real, sincere, and authentic.",
-  },
-  {
-    word: "Fragile",
-    definition: "Easily broken or damaged.",
-  },
-  {
-    word: "Emerge",
-    definition: "To come into view or become known.",
-  },
-  {
-    word: "Weary",
-    definition: "Feeling very tired from work or effort.",
-  },
-  {
-    word: "Mellow",
-    definition: "Soft, smooth, and pleasant in tone or flavor.",
-  },
-  {
-    word: "Origin",
-    definition: "The beginning or source of something.",
-  },
-  {
-    word: "Serene",
-    definition: "Calm, peaceful, and untroubled.",
-  },
-  {
-    word: "Thrive",
-    definition: "To grow, develop, or be successful.",
-  },
-  {
-    word: "Luminous",
-    definition: "Emitting or reflecting light; bright.",
-  },
-  {
-    word: "Ponder",
-    definition: "To think carefully about something.",
-  },
-  {
-    word: "Swift",
-    definition: "Moving or capable of moving at high speed.",
-  },
-  {
-    word: "Nimble",
-    definition: "Quick and light in movement or action.",
-  },
-  {
-    word: "Robust",
-    definition: "Strong and healthy; vigorous.",
-  },
-  {
-    word: "Meek",
-    definition: "Quiet, gentle, and easily imposed on.",
-  },
-  {
-    word: "Classic",
-    definition: "Judged over a period of time to be of the highest quality.",
-  },
-  {
-    word: "Ambitious",
-    definition: "Having a strong desire to achieve something.",
-  },
-  {
-    word: "Brisk",
-    definition: "Quick and energetic in movement or action.",
-  },
-  {
-    word: "Loyal",
-    definition: "Showing firm and constant support.",
-  },
-  {
-    word: "Tranquil",
-    definition: "Free from disturbance; calm.",
-  },
-];
+import { VOCABULARY } from "./vocabulary.js";
 
 export default function App() {
   const [isBooting, setIsBooting] = useState(true);
+  const [isLightMode, setIsLightMode] = useState(() => {
+    return localStorage.getItem("theme") === "light";
+  });
+
+  useEffect(() => {
+    if (isLightMode) {
+      document.body.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.body.classList.remove("light-mode");
+      localStorage.setItem("theme", "dark");
+    }
+  }, [isLightMode]);
+
   const [expectedText, setExpectedText] = useState("");
   const [language, setLanguage] = useState("en");
   const [modelName, setModelName] = useState("small");
@@ -176,18 +76,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
-  const [selectedWordIndex, setSelectedWordIndex] = useState(null);
   const [view, setView] = useState("pronunciation");
-
-  // Vocabulary game state
-  const [vocabScore, setVocabScore] = useState(0);
-  const [vocabAttempts, setVocabAttempts] = useState(0);
-  const [vocabShuffledVocab, setVocabShuffledVocab] = useState(() =>
-    shuffle([...VOCABULARY]),
-  );
-  const [vocabCurrentIndex, setVocabCurrentIndex] = useState(0);
-  const [vocabSelectedAnswer, setVocabSelectedAnswer] = useState(null);
-  const [vocabIsCorrect, setVocabIsCorrect] = useState(false);
 
   const mispronouncedCount = result?.mispronounced_words?.length || 0;
 
@@ -258,7 +147,6 @@ export default function App() {
   async function onRecordingStop(audioBlob) {
     setError("");
     setLoading(true);
-    setSelectedWordIndex(null);
     try {
       const res = await evaluateAudio({
         audioBlob,
@@ -283,15 +171,11 @@ export default function App() {
     }
   }
 
-  const selectedWord = useMemo(() => {
-    if (!result || selectedWordIndex === null) return null;
-    return result.words?.find((w) => w.index === selectedWordIndex) || null;
-  }, [result, selectedWordIndex]);
 
   if (isBooting) {
     return (
       <div className="boot-screen">
-        <div className="boot-logo">🎙️</div>
+        <div className="boot-logo"><Mic size={48} /></div>
         <div className="boot-loader">
           <div className="boot-progress"></div>
         </div>
@@ -303,6 +187,17 @@ export default function App() {
   return (
     <div className="container">
       
+      
+      <div style={{ position: "absolute", top: 24, right: 24 }}>
+        <button 
+          onClick={() => setIsLightMode(!isLightMode)}
+          style={{ width: 44, height: 44, borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}
+          title="Toggle Theme"
+        >
+          {isLightMode ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+      </div>
+
       <div className="page-title">
         <div className="page-title-badge">UCCHARAN</div>
       </div>
@@ -393,16 +288,16 @@ export default function App() {
                   <button 
                     type="button" 
                     onClick={() => playTTS(expectedText, language)}
-                    style={{ fontSize: 13, padding: "8px 14px" }}
+                    style={{ fontSize: 13, padding: "8px 14px", display: "flex", alignItems: "center", gap: "6px" }}
                   >
-                    🔊 Listen to Pronunciation
+                    <Volume2 size={16} /> Listen to Pronunciation
                   </button>
                 </div>
               </>
             )}
             {freeMode && (
               <textarea
-                value={expectedText}
+                value={result ? result.transcribed_text : ""}
                 readOnly
                 placeholder="Speak into the mic and view your transcription here"
                 disabled={loading}
@@ -480,10 +375,10 @@ export default function App() {
 
             {result?.ai_feedback && (
               <div className="card" style={{ marginTop: 20, background: "rgba(167, 139, 250, 0.08)", border: "1px solid rgba(167, 139, 250, 0.25)", padding: "20px" }}>
-                <div className="meta" style={{ color: "#c4b5fd", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "18px" }}>🤖</span>AI Pronunciation Coach
+                <div className="meta" style={{ color: "var(--color-purple-light)", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                  <Bot size={20} /> AI Pronunciation Coach
                 </div>
-                <div style={{ lineHeight: "1.8", color: "#e2e8f0", whiteSpace: "pre-wrap", fontSize: "15px" }}>
+                <div style={{ lineHeight: "1.8", color: "var(--text-main)", whiteSpace: "pre-wrap", fontSize: "15px" }}>
                   {result.ai_feedback}
                 </div>
               </div>
@@ -495,42 +390,48 @@ export default function App() {
             {result ? (
               <>
                 <div className="results-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "20px" }}>
-                  <div className="result-card" style={{ background: "rgba(99, 102, 241, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-                    <div className="meta" style={{ color: "#a5b4fc", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Accuracy</div>
-                    <div style={{ fontSize: "20px", fontWeight: "700", color: "#fff" }}>
-                      {Math.round(result.accuracy_score)}%
-                    </div>
-                  </div>
-                  <div className="result-card" style={{ background: "rgba(139, 92, 246, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
-                    <div className="meta" style={{ color: "#c4b5fd", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>WER</div>
-                    <div style={{ fontSize: "20px", fontWeight: "700", color: "#fff" }}>
-                      {result.wer.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className="result-card" style={{ background: "rgba(59, 130, 246, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
-                    <div className="meta" style={{ color: "#93c5fd", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Similarity</div>
-                    <div style={{ fontSize: "20px", fontWeight: "700", color: "#fff" }}>
-                      {Math.round(result.levenshtein_similarity * 100)}%
-                    </div>
-                  </div>
+                  {result.has_expected && (
+                    <>
+                      <div className="result-card" style={{ background: "rgba(99, 102, 241, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
+                        <div className="meta" style={{ color: "var(--color-indigo-light)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Accuracy</div>
+                        <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-heading)" }}>
+                          {Math.round(result.accuracy_score)}%
+                        </div>
+                      </div>
+                      <div className="result-card" style={{ background: "rgba(139, 92, 246, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
+                        <div className="meta" style={{ color: "var(--color-purple-light)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>WER</div>
+                        <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-heading)" }}>
+                          {result.wer.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="result-card" style={{ background: "rgba(59, 130, 246, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
+                        <div className="meta" style={{ color: "var(--color-blue-light)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Similarity</div>
+                        <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-heading)" }}>
+                          {Math.round(result.levenshtein_similarity * 100)}%
+                        </div>
+                      </div>
+                    </>
+                  )}
                   {result.wpm && (
                     <div className="result-card" style={{ background: "rgba(167, 139, 250, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(167, 139, 250, 0.2)" }}>
-                      <div className="meta" style={{ color: "#c4b5fd", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Speaking Rate</div>
-                      <div style={{ fontSize: "20px", fontWeight: "700", color: "#fff" }}>{Math.round(result.wpm)} <span style={{ fontSize: "12px", fontWeight: "400", opacity: 0.7 }}>WPM</span></div>
+                      <div className="meta" style={{ color: "var(--color-purple-light)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Speaking Rate</div>
+                      <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-heading)" }}>{Math.round(result.wpm)} <span style={{ fontSize: "12px", fontWeight: "400", opacity: 0.7 }}>WPM</span></div>
                     </div>
                   )}
-                  <div className="result-card" style={{ background: "rgba(239, 68, 68, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
-                    <div className="meta" style={{ color: "#fca5a5", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Errors</div>
-                    <div style={{ fontSize: "20px", fontWeight: "700", color: "#fff" }}>
-                      {mispronouncedCount}
+                  {result.has_expected && (
+                    <div className="result-card" style={{ background: "rgba(239, 68, 68, 0.1)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
+                      <div className="meta" style={{ color: "var(--color-red-light)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Errors</div>
+                      <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-heading)" }}>
+                        {mispronouncedCount}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {!result.has_expected && (
-                  <div className="card" style={{ marginBottom: "20px", background: "rgba(255, 255, 255, 0.02)", border: "1px dashed rgba(255, 255, 255, 0.1)", textAlign: "center", padding: "20px" }}>
-                    <div style={{ fontSize: "24px", marginBottom: "8px" }}>📢</div>
-                    <div className="meta" style={{ color: "#94a3b8" }}>
+                  <div className="card" style={{ marginBottom: "20px", background: "var(--card-bg-faint)", border: "1px dashed rgba(255, 255, 255, 0.1)", textAlign: "center", padding: "20px" }}>
+                    <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center", color: "var(--text-muted)" }}><Megaphone size={28} /></div>
+                    <div className="meta" style={{ color: "var(--text-muted)" }}>
                       Free Speech Mode Active. I've transcribed your words below.
                       To get accuracy scores and pronunciation tips, switch to "Practice Mode".
                     </div>
@@ -539,10 +440,10 @@ export default function App() {
 
                 {result.feedback && (
                   <div className="card" style={{ marginTop: 20, background: "rgba(59, 130, 246, 0.05)", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
-                    <div className="meta" style={{ color: "#93c5fd", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                      <span style={{ fontSize: "18px" }}></span>Feedback
+                    <div className="meta" style={{ color: "var(--color-blue-light)", display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                      <MessageSquare size={18} /> Feedback
                     </div>
-                    <div style={{ lineHeight: "1.8", color: "#e2e8f0", whiteSpace: "pre-wrap" }}>
+                    <div style={{ lineHeight: "1.8", color: "var(--text-main)", whiteSpace: "pre-wrap" }}>
                       {result.feedback}
                     </div>
                   </div>
@@ -571,64 +472,22 @@ export default function App() {
                   </div>
                 ) : null}
 
-                {result.grammar_issues ? (
+                {result.ai_grammar_analysis ? (
                   <div className="status" style={{ marginTop: 20 }}>
                     <div className="meta" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                      <span style={{ fontSize: "18px" }}>✍️</span> Grammar Analysis
+                      <PenTool size={18} /> AI Grammar Analysis
                     </div>
-                    <div className="list">
-                      {result.grammar_issues.length ? (
-                        <>
-                          {result.grammar_issues.map((issue, idx) => (
-                            <div
-                              key={idx}
-                              className="history-item"
-                              style={{
-                                padding: "12px 16px",
-                                background: "rgba(239, 68, 68, 0.1)",
-                                color: "#fca5a5",
-                                border: "1px solid rgba(239, 68, 68, 0.2)",
-                                borderRadius: "12px",
-                                marginTop: idx > 0 ? 8 : 0,
-                                fontSize: "14px"
-                              }}
-                            >
-                              {issue}
-                            </div>
-                          ))}
-                          {result.corrected_text && (
-                            <div
-                              className="history-item"
-                              style={{
-                                padding: "12px 16px",
-                                background: "rgba(16, 185, 129, 0.1)",
-                                color: "#6ee7b7",
-                                border: "1px solid rgba(16, 185, 129, 0.2)",
-                                borderRadius: "12px",
-                                marginTop: 12,
-                                fontSize: "14px"
-                              }}
-                            >
-                              <div style={{ fontWeight: "700", marginBottom: "4px", color: "#34d399" }}>Corrected sentence:</div>
-                              {result.corrected_text}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div
-                          className="history-item"
-                          style={{
-                            padding: "12px 16px",
-                            background: "rgba(16, 185, 129, 0.1)",
-                            color: "#6ee7b7",
-                            border: "1px solid rgba(16, 185, 129, 0.2)",
-                            borderRadius: "12px",
-                            fontSize: "14px"
-                          }}
-                        >
-                          ✨ No grammar issues detected. Your sentence structure is correct!
-                        </div>
-                      )}
+                    <div className="history-item" style={{
+                      padding: "16px",
+                      background: "rgba(16, 185, 129, 0.05)",
+                      color: "var(--text-main)",
+                      border: "1px solid rgba(16, 185, 129, 0.2)",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                      lineHeight: "1.6",
+                      whiteSpace: "pre-wrap"
+                    }}>
+                      {result.ai_grammar_analysis}
                     </div>
                   </div>
                 ) : null}
@@ -647,67 +506,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div style={{ marginTop: 14 }}>
-                  <div className="meta">Word-level highlight</div>
-                  <WordHighlighter
-                    words={result.words || []}
-                    selectedIndex={selectedWordIndex}
-                    onSelect={(idx) => setSelectedWordIndex(idx)}
-                  />
 
-                  {selectedWord ? (
-                    <div className="card" style={{ marginTop: 20, background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                        <div>
-                          <div className="meta" style={{ marginBottom: "4px" }}>Selected Word</div>
-                          <div style={{ fontSize: "24px", fontWeight: "700", color: "#fff" }}>{selectedWord.expected}</div>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <div className="meta" style={{ marginBottom: "4px" }}>Similarity</div>
-                          <div style={{ 
-                            fontSize: "20px", 
-                            fontWeight: "700", 
-                            color: selectedWord.ok ? "#34d399" : "#f87171" 
-                          }}>
-                            {selectedWord.phoneme_similarity !== null ? `${Math.round(selectedWord.phoneme_similarity * 100)}%` : "N/A"}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-                        <div style={{ padding: "10px", background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px" }}>
-                          <div className="meta" style={{ fontSize: "10px", marginBottom: "4px" }}>Heard As</div>
-                          <div style={{ color: "#e2e8f0" }}>{selectedWord.recognized || "—"}</div>
-                        </div>
-                        <div style={{ padding: "10px", background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px" }}>
-                          <div className="meta" style={{ fontSize: "10px", marginBottom: "4px" }}>Status</div>
-                          <div style={{ color: selectedWord.ok ? "#34d399" : "#f87171" }}>
-                            {selectedWord.ok ? "Correct" : "Needs Practice"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {selectedWord.feedback && (
-                        <div style={{ marginBottom: "12px" }}>
-                          <div className="meta" style={{ fontSize: "11px", marginBottom: "4px", color: "#94a3b8" }}>Observation</div>
-                          <div style={{ color: "#cbd5e1", fontSize: "14px" }}>{selectedWord.feedback}</div>
-                        </div>
-                      )}
-                      
-                      {selectedWord.suggestion && (
-                        <div style={{ padding: "12px", background: "rgba(52, 211, 153, 0.1)", border: "1px solid rgba(52, 211, 153, 0.2)", borderRadius: "8px" }}>
-                          <div className="meta" style={{ fontSize: "11px", marginBottom: "4px", color: "#34d399" }}>Pro Tip</div>
-                          <div style={{ color: "#ecfdf5", fontSize: "14px", fontWeight: "500" }}>{selectedWord.suggestion}</div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="card" style={{ marginTop: 20, textAlign: "center", padding: "30px", background: "rgba(255, 255, 255, 0.02)", border: "1px dashed rgba(255, 255, 255, 0.1)" }}>
-                      <div style={{ fontSize: "24px", marginBottom: "10px" }}>👆</div>
-                      <div className="meta">Tap any highlighted word above to get specific pronunciation tips and details.</div>
-                    </div>
-                  )}
-                </div>
 
                 {result.mispronounced_words?.length ? (
                   <div style={{ marginTop: 14 }}>
@@ -719,11 +518,8 @@ export default function App() {
                           className="history-item"
                           style={{
                             borderTop: "1px solid #eee",
-                            cursor: "pointer",
                           }}
-                          onClick={() => setSelectedWordIndex(w.index)}
-                          role="button"
-                          tabIndex={0}
+                          
                         >
                           <div className="left">
                             <div>
@@ -761,20 +557,9 @@ export default function App() {
         </div>
       ) : (
         <VocabularyGame
-          score={vocabScore}
-          setScore={setVocabScore}
-          attempts={vocabAttempts}
-          setAttempts={setVocabAttempts}
-          shuffledVocab={vocabShuffledVocab}
-          setShuffledVocab={setVocabShuffledVocab}
-          currentIndex={vocabCurrentIndex}
-          setCurrentIndex={setVocabCurrentIndex}
-          selectedAnswer={vocabSelectedAnswer}
-          setSelectedAnswer={setVocabSelectedAnswer}
-          isCorrect={vocabIsCorrect}
-          setIsCorrect={setVocabIsCorrect}
-          shuffle={shuffle}
           vocabulary={VOCABULARY}
+          playTTS={playTTS}
+          shuffle={shuffle}
         />
       )}
 

@@ -30,8 +30,7 @@ class EvaluateResponse(BaseModel):
     # Token-level results aligned to the expected words.
     words: list[EvaluateResponseWord]
     suggestions: list[str] = []
-    grammar_issues: list[str] = []
-    corrected_text: str | None = None
+    ai_grammar_analysis: str | None = None
 
     # Subset of `words` where ok == False.
     mispronounced_words: list[EvaluateResponseWord]

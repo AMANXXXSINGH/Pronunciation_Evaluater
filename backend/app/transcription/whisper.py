@@ -70,11 +70,12 @@ class WhisperTranscriber:
         *,
         model_name: str = "base",
         language: str | None = None,
+        initial_prompt: str | None = None,
     ) -> TranscriptionResult:
         self._ensure_ffmpeg_on_path()
         model = self._get_model(model_name)
         # fp16=False is safer on CPU.
-        result = model.transcribe(audio_path, language=language, task='transcribe', fp16=False)
+        result = model.transcribe(audio_path, language=language, task='transcribe', fp16=False, initial_prompt=initial_prompt, condition_on_previous_text=False)
         text = (result.get("text") or "").strip()
         return TranscriptionResult(text=text)
 

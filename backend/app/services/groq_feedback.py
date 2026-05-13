@@ -77,3 +77,25 @@ Avoid jargon. Make it supportive and actionable.
         except Exception as e:
             print(f"Groq API error: {e}", file=sys.stderr)
             return None
+
+    def generate_grammar_analysis(self, transcribed_text: str) -> Optional[str]:
+        if not self.enabled or not self.client:
+            return None
+
+        try:
+            prompt = f"""You are an English grammar expert. Please analyze the following transcribed text for any grammatical errors.
+Text: "{transcribed_text}"
+
+Provide a concise, helpful summary (2-3 sentences) of any grammar, structural, or usage issues. If the grammar is perfect, say "Your grammar is perfect!" and briefly explain why it's well-structured. Keep the tone encouraging."""
+
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                max_tokens=250,
+            )
+
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Groq API error (grammar): {e}", file=sys.stderr)
+            return None
